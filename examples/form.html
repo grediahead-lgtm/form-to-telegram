@@ -1,0 +1,18 @@
+<!-- Minimal form for your site. The field "website" is a trap for bots: keep it hidden. -->
+<form id="f">
+  <input name="name" placeholder="Name" required>
+  <input name="phone" placeholder="Phone">
+  <input name="email" placeholder="Email">
+  <textarea name="message" placeholder="Message"></textarea>
+  <input name="website" tabindex="-1" autocomplete="off" style="position:absolute;left:-9999px" aria-hidden="true">
+  <button>Send</button>
+</form>
+<script>
+document.getElementById('f').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const data = Object.fromEntries(new FormData(e.target));
+  data.page = location.href;
+  const r = await fetch('https://your-relay.example/submit', {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(data)});
+  alert(r.ok ? 'Thank you!' : 'Please check the fields and try again.');
+});
+</script>
