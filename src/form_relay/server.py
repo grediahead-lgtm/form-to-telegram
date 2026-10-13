@@ -10,6 +10,8 @@ def make_handler(relay, cfg):
     trust_proxy = bool(cfg.get("trust_proxy_header"))
 
     class H(BaseHTTPRequestHandler):
+        timeout = 10  # a client that stays silent is dropped, so idle connections cannot pile up threads
+
         def _cors(self):
             o = self.headers.get("Origin", "")
             if o in origins:

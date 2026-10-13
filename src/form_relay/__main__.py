@@ -16,6 +16,8 @@ def main(argv=None):
     args = ap.parse_args(argv)
     with open(args.config, encoding="utf-8") as f:
         cfg = json.load(f)
+    if not cfg.get("allowed_origins"):
+        raise ValueError("config.allowed_origins must list your site (for example https://your-site.example)")
     send = None
     if not args.no_telegram:
         client = TelegramClient(os.environ.get("TELEGRAM_BOT_TOKEN", ""))

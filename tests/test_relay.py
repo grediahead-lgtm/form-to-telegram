@@ -117,6 +117,24 @@ class HttpTests(unittest.TestCase):
         self.assertEqual(self.post("/submit", b"[1,2]")[0], 400)
         self.assertEqual(self.post("/submit", b"{not json")[0], 400)
 
+    def test_idle_connection_is_dropped(self):
+        import socket
+        import time
+        self.assertEqual(make_handler(self.relay, CFG).timeout, 10)
+        s = socket.create_connection(("127.0.0.1", self.srv.server_port))
+        s.sendall(b"POST /submit HTTP/1.1\r\nContent-Length: 10\r\n\r\n")  # promises a body and never sends it
+        s.settimeout(1)
+        time.sleep(0.1)
+        s.close()  # the server thread must not hang the test teardown
+
+    def test_empty_allowed_origins_is_refused_at_start(self):
+        from form_relay.__main__ import main
+        cfgfile = os.path.join(self.tmp.name, "c.json")
+        with open(cfgfile, "w", encoding="utf-8") as f:
+            json.dump({"allowed_origins": []}, f)
+        with self.assertRaises(ValueError):
+            main(["--config", cfgfile, "--no-telegram"])
+
     def test_no_cors_header_for_foreign_origin(self):
         _, _, headers = self.post("/submit", json.dumps(GOOD).encode(), origin="https://evil.example")
         self.assertIsNone(headers.get("Access-Control-Allow-Origin"))
