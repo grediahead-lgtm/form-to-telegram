@@ -16,7 +16,7 @@ from form_relay.server import make_handler  # noqa: E402
 from http.server import ThreadingHTTPServer  # noqa: E402
 
 CFG = {"allowed_origins": ["https://ok.example"], "per_ip_per_hour": 3, "max_links": 1, "honeypot": "website"}
-GOOD = {"name": "Ira", "phone": "+380501112233", "email": "", "message": "Need a quote"}
+GOOD = {"name": "Ira", "phone": "+380000000001", "email": "", "message": "Need a quote"}
 
 
 def relay(d, send=None, cfg=CFG):
@@ -40,7 +40,7 @@ class ValidationTests(unittest.TestCase):
     def test_errors(self):
         with tempfile.TemporaryDirectory() as d:
             r = relay(d)
-            for bad, text in (({"name": "I", "phone": "+380501112233"}, "name"), ({"name": "Ira"}, "phone or email"),
+            for bad, text in (({"name": "I", "phone": "+380000000001"}, "name"), ({"name": "Ira"}, "phone or email"),
                               ({"name": "Ira", "phone": "123"}, "phone looks"), ({"name": "Ira", "email": "x@y"}, "email looks")):
                 code, body = r.accept(bad, "ip%s" % text)
                 self.assertEqual(code, 400, text)
@@ -106,7 +106,7 @@ class HttpTests(unittest.TestCase):
         code, body, headers = self.post("/submit", json.dumps(GOOD).encode())
         self.assertEqual((code, body), (200, {"ok": True}))
         self.assertEqual(headers["Access-Control-Allow-Origin"], "https://ok.example")
-        code, _, _ = self.post("/submit", b"name=Oleg&phone=%2B380501112233&message=hi", ctype="application/x-www-form-urlencoded")
+        code, _, _ = self.post("/submit", b"name=Oleg&phone=%2B380000000001&message=hi", ctype="application/x-www-form-urlencoded")
         self.assertEqual(code, 200)
         self.assertEqual(len(read(os.path.join(self.tmp.name, "l.csv"))), 2)
 
